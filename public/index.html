@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>小欧问答</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .question-form {
+      margin-bottom: 20px;
+    }
+
+    .question-form label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .question-form input,
+    .question-form textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .question-form button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .question-form button:hover {
+      background-color: #0056b3;
+    }
+
+    .question-form select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .question-form select:focus {
+      border-color: #007bff;
+    }
+
+    .answer {
+      margin-top: 20px;
+      padding: 20px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+    }
+
+    .answer p {
+      margin: 0;
+    }
+
+    .answer img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .loading span {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin: 0 3px;
+      background-color: #007bff;
+      border-radius: 50%;
+      animation: loading 1s infinite;
+    }
+
+    .loading span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .loading span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes loading {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>小欧问答</h1>
+    <div class="question-form" id="questionForm">
+      <label for="question">问题:</label>
+      <input type="text" id="question" name="question" required>
+      <button class="submit-button" id="submit-button">提交问题</button>
+      <select id="model">
+        <option value="chat">聊天</option>
+        <option value="text-to-image">图片生成</option>
+      </select>
+      <label for="token">Token:</label>
+      <input type="text" id="token" placeholder="请输入Token(可选)" name="token">
+    </div>
+    <div class="answer" id="answer">
+      <p>回答内容将显示在这里。</p>
+    </div>
+    <div class="loading" id="loading">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const submitButton = document.getElementById('submit-button');
+      const answerDiv = document.getElementById('answer');
+      const loadingDiv = document.getElementById('loading');
+      const questionInput = document.getElementById('question');
+      const modelSelect = document.getElementById('model');
+      const tokenInput = document.getElementById('token');
+      const onSubmit = async () => {
+        const question = questionInput.value.trim();
+        const model = modelSelect.value;
+        const token = tokenInput.value.trim();
+
+        const endpoint = model === 'chat' ? '/chat' : '/text-to-image';
+
+        if (question === '') {
+          alert('请输入问题');
+          return;
+        }
+
+        // 显示加载动画
+        loadingDiv.style.display = 'block';
+        answerDiv.style.display = 'none';
+
+        try {
+          const response = await fetch(endpoint, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({ question: question, token: token }),
+          });
+
+          const data = await response.json();
+          answerDiv.style.display = 'block';
+
+          if (model === 'chat') {
+            let answer = data.answer;
+            answerDiv.innerHTML = '';
+            while (answer.length > 0) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+              answerDiv.innerHTML += answer.slice(0, 2);
+              answer = answer.slice(2);
+            }
+          } else {
+            answerDiv.innerHTML = `
+            <div style="display: flex; justify-content: center;">
+              <img style="width: 250px; height: 250px;" src="${data.url}" alt="生成的图片">
+            </div>
+            `;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          answerDiv.innerHTML = '获取答案时发生错误，请稍后再试。';
+          answerDiv.style.display = 'block';
+        } finally {
+          // 隐藏加载动画
+          loadingDiv.style.display = 'none';
+        }
+      };
+
+      submitButton.addEventListener('click', onSubmit);
+      questionInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          onSubmit();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
