@@ -55,6 +55,12 @@ export default class TextToImageService {
   }
 
   private async saveImage(response: Response): Promise<string> {
+    // 确保 public 文件夹存在
+    if (!fs.existsSync(CONFIG.PUBLIC_PATH)) {
+      fs.mkdirSync(CONFIG.PUBLIC_PATH, { recursive: true });
+      logger.info(`创建目录：${CONFIG.PUBLIC_PATH}`);
+    }
+
     const filename = randomUUID();
     const filepath = `${CONFIG.PUBLIC_PATH}/${filename}.png`;
 
