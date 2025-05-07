@@ -9,6 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import logger from 'src/utils/logger';
+import { wsMap } from 'src/utils/ws';
 
 /**
  * WebSocket网关类,用于处理实时消息通信
@@ -51,6 +52,12 @@ export class ChatGateway
     logger.info('WebSocket 连接断开', client);
   }
 
+  @SubscribeMessage('register')
+  handleRegister(client: Socket, userId: string) {
+    logger.info(`用户注册: ${userId}`);
+    wsMap.set(userId, client);
+    this.sendMessage(client, `用户注册成功, id 为${userId}`);
+  }
   /**
    * 处理接收到的消息
    * @param client - 发送消息的客户端Socket实例
@@ -60,6 +67,34 @@ export class ChatGateway
   handleMessage(client: Socket, message: string) {
     logger.info(`收到消息: ${message}`);
     this.sendMessage(client, message);
+  }
+
+  @SubscribeMessage('call')
+  handleCall(
+    client: Socket,
+    message: { from: string; to: string; sdp: string },
+  ) {
+    logger.info(`收到消息: ${message}`);
+    this.sendMessage(client, `呼叫用户${message.to}`);
+    wsMap.get(message.to)?.emit('called', {
+      message: `被用户${message.from}呼叫`,
+      sdp: message.sdp,
+    });
+  }
+
+  // 处理ICE候选者
+  @SubscribeMessage('iceCandidate')
+  handleIceCandidate(_: any, data: any) {
+    const { from, ice } = data;
+    const targetSocket = wsMap.get(from);
+
+    console.log(JSON.stringify(data));
+
+    if (targetSocket) {
+      targetSocket.emit('ice', { ice });
+    } else {
+      console.log(`目标用户 ${from} 不在线, 无法发送ICE候选者`);
+    }
   }
 
   /**
