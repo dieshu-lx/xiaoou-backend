@@ -1,7 +1,7 @@
 import logger from 'src/utils/logger';
 import * as fs from 'fs';
 import { randomUUID } from 'crypto';
-import ChatService from './chat.service';
+import { ChatService } from './chat.service';
 
 // 配置常量
 const CONFIG = {
@@ -17,7 +17,7 @@ const CONFIG = {
   PUBLIC_PATH: './public',
 };
 
-export default class TextToImageService {
+export class TextToImageService {
   private chatService: ChatService;
 
   constructor() {

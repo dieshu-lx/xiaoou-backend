@@ -1,8 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import SocketService from 'src/service/socket.service';
+import { SocketService } from 'src/service';
 
 @Controller('socket')
-export default class SocketController {
+export class SocketController {
   constructor(private readonly socketService: SocketService) {}
 
   @Post('send-message')

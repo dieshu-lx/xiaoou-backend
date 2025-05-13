@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { IResponse } from 'src/models';
-import TextToImageService from 'src/service/text-to-image.service';
+import { TextToImageService } from 'src/service';
 
 interface IChatResponse {
   id: string;
@@ -10,7 +10,7 @@ interface IChatResponse {
 }
 
 @Controller('text-to-image')
-export default class TextToImageController {
+export class TextToImageController {
   constructor(private readonly textToImageService: TextToImageService) {}
 
   @Post('')

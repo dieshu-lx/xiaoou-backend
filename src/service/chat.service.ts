@@ -23,7 +23,7 @@ interface ChatErrorResponse {
   error: string;
 }
 
-export default class ChatService {
+export class ChatService {
   /**
    * 创建AI对话完成（普通返回）
    * @param question 用户问题

@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Res } from '@nestjs/common';
-import ChatService from 'src/service/chat.service';
 import { Response } from 'express';
+import { ChatService } from 'src/service';
 
 interface IChatParams {
   question: string;
