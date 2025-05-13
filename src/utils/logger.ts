@@ -26,7 +26,7 @@ const logger = createLogger({
   ),
   transports: [
     new transports.File({
-      filename: `${logDir}/nest-test-${new Date().toISOString().split('T')[0]}.log`,
+      filename: `${logDir}/info-${new Date().toISOString().split('T')[0]}.log`,
       level: 'info',
     }),
     new transports.File({
