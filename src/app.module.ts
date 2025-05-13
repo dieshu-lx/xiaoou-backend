@@ -17,13 +17,13 @@ import { join } from 'path';
     ChatController,
     SocketController,
     TextToImageController,
-    ChatGateway,
   ],
   providers: [
     AppService,
     ChatService,
     SocketService,
     TextToImageService,
+    ChatGateway,
   ],
 })
 export class AppModule implements NestModule {
